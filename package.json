@@ -1,0 +1,68 @@
+{
+  "name": "copilot-model-restore",
+  "displayName": "Copilot Model Restore",
+  "description": "Configurable reminder to return to your preferred Copilot model.",
+  "version": "0.2.0",
+  "publisher": "local-test",
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "copilotModelRestore.restore",
+        "title": "Copilot Model Restore: Return to Preferred Model"
+      },
+      {
+        "command": "copilotModelRestore.openPicker",
+        "title": "Copilot Model Restore: Open Model Picker"
+      },
+      {
+        "command": "copilotModelRestore.listModels",
+        "title": "Copilot Model Restore: List Available Models"
+      }
+    ],
+    "configuration": {
+      "title": "Copilot Model Restore",
+      "properties": {
+        "copilotModelRestore.usualModelLabel": {
+          "type": "string",
+          "default": "DeepSeek: DeepSeek V4 Flash 0423 (OpenRouter)",
+          "description": "Name of your preferred Copilot model, for example GPT-5 or Claude Sonnet."
+        },
+        "copilotModelRestore.usualModelId": {
+          "type": "string",
+          "default": "deepseek/deepseek-v4-flash",
+          "description": "ID of your preferred Copilot model, for example deepseek/deepseek-v4-flash."
+        },
+        "copilotModelRestore.usualModelVendor": {
+          "type": "string",
+          "default": "openrouter",
+          "description": "Vendor of your preferred Copilot model, for example OpenRouter."
+        },
+        "copilotModelRestore.restoreSource": {
+          "type": "string",
+          "enum": [
+            "default",
+            "extension",
+            "both"
+          ],
+          "default": "default",
+          "description": "Which model to restore: 'default' uses VS Code's chat.defaultModel, 'extension' uses the model configured in this extension's settings, 'both' tries the extension model first and falls back to the default."
+        },
+        "copilotModelRestore.showNotificationOnAgentStop": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show an informational message when a Copilot agent turn finishes. When false, the model is restored silently."
+        }
+      }
+    }
+  }
+}
