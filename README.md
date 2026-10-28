@@ -1,29 +1,80 @@
 
 # Copilot Model Restore
 
-A VS Code extension that reminds you to return to your preferred
-GitHub Copilot Chat model after an agent turn finishes.
+A VS Code extension that **automatically restores your preferred GitHub Copilot
+Chat model** every time an agent turn finishes. When the main Copilot agent
+completes a turn, the extension switches the active model back to your
+configured default — so you never get stuck on a model you didn't choose.
 
 ## Features
 
-- Configure your preferred model in VS Code Settings.
-- Show a status bar button using your configured model name.
-- Open the Copilot model picker.
-- Receive an optional notification from an agentStop hook.
+- **Automatic model restore on agent stop.** When a Copilot agent turn
+  finishes, the extension immediately switches the active chat model back to
+  your configured default. No manual action needed.
+- **Restore to the VS Code default model.** By default the extension restores
+  the model defined in VS Code's `chat.defaultModel` setting, so whatever
+  model you set as your default is the one you always return to.
+- **Flexible restore source.** Choose whether to restore the VS Code default
+  model, a model configured in this extension, or try the extension model
+  first and fall back to the default.
+- **Status bar button.** Shows your preferred model and lets you restore it
+  manually with one click.
+- **Optional notification.** Turn on a reminder notification when an agent
+  turn finishes. When disabled, the restore happens silently.
+
+## How it works
+
+The extension installs an `agentStop` hook into `~/.copilot/hooks/`. The
+`agentStop` event fires whenever the main Copilot agent finishes a turn. On
+that event, the extension calls the documented model-change command to switch
+the active chat model back to your configured default — automatically.
 
 ## Configure
 
 Open Preferences: Open User Settings (JSON) and add:
 
+```json
 {
-  "copilotModelRestore.usualModelLabel": "GPT-5",
+  "chat.defaultModel": "deepseek/deepseek-v4-flash",
+  "copilotModelRestore.restoreSource": "default",
+  "copilotModelRestore.showNotificationOnAgentStop": false
+}
+```
+
+### Restore source
+
+The `copilotModelRestore.restoreSource` setting controls which model is
+restored:
+
+| Value       | Behavior                                                                 |
+| ----------- | ------------------------------------------------------------------------ |
+| `default`   | Restores the model set in VS Code's `chat.defaultModel` setting. This is the default. |
+| `extension` | Restores the model configured in this extension's own settings (`usualModelLabel` / `usualModelId` / `usualModelVendor`). |
+| `both`      | Tries the extension model first; if it is not found, falls back to the default model. |
+
+### Extension model settings
+
+If you use `restoreSource: "extension"` or `"both"`, configure the model this
+extension should restore:
+
+```json
+{
+  "copilotModelRestore.usualModelLabel": "DeepSeek: DeepSeek V4 Flash 0423 (OpenRouter)",
+  "copilotModelRestore.usualModelId": "deepseek/deepseek-v4-flash",
+  "copilotModelRestore.usualModelVendor": "openrouter"
+}
+```
+
+### Notification
+
+By default the model is restored silently. To also show a reminder
+notification when an agent turn finishes, set:
+
+```json
+{
   "copilotModelRestore.showNotificationOnAgentStop": true
 }
-
-Replace GPT-5 with the model name you normally use.
-
-The model is always restored when a Copilot agent turn finishes. Set
-`showNotificationOnAgentStop` to `true` to also show a reminder notification.
+```
 
 ## Test the extension
 
@@ -31,7 +82,7 @@ The model is always restored when a Copilot agent turn finishes. Set
 2. Press F5.
 3. In the Extension Development Host window, open Copilot Chat.
 4. Run "Copilot Model Restore: Return to Preferred Model".
-5. Confirm that the model picker opens.
+5. Confirm that the active model switches back to your configured default.
 
 ## Optional agentStop hook
 
@@ -81,6 +132,7 @@ https://code.visualstudio.com/docs/agent-customization/hooks
 
 ## Limitations
 
-The extension uses the documented model-picker command. It does not
-automatically select a specific model because a supported public API
-for changing the active Copilot Chat model has not been verified.
+The extension restores the model using the documented model-change command. It
+can only switch to a model that is currently available in your Copilot
+installation; if the configured model is not found among the available models,
+a warning is shown and no change is made.
